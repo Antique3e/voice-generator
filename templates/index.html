@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Voice AI Studio</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/static/css/style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="app-root">
+      <header class="app-header">
+        <div class="app-logo">Voice AI Studio</div>
+        <div class="app-header-status" id="status-bar">
+          <span class="status-dot" id="status-dot"></span>
+          <span id="status-text">Connecting…</span>
+        </div>
+      </header>
+
+      <main class="app-main">
+        <!-- LEFT PANEL -->
+        <section class="panel panel-left">
+          <div class="panel-scroll">
+            <div class="panel-block">
+              <div class="block-header">
+                <h2>Model &amp; Settings</h2>
+              </div>
+              <div class="form-row">
+                <label for="model-select">
+                  Model
+                  <span class="tooltip" data-tooltip="Future: choose between multiple TTS / voice models.">
+                    ?
+                  </span>
+                </label>
+                <select id="model-select" disabled>
+                  <option>Higgs-Audio V2 (coming soon)</option>
+                </select>
+              </div>
+
+              <div class="form-row">
+                <label>
+                  Quantization
+                  <span class="tooltip" data-tooltip="Controls VRAM usage. Lower bits = smaller memory footprint, slightly lower quality.">
+                    ?
+                  </span>
+                </label>
+                <div class="radio-group">
+                  <label><input type="radio" name="quant" checked /> Full</label>
+                  <label><input type="radio" name="quant" /> 8-bit</label>
+                  <label><input type="radio" name="quant" /> 4-bit</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="panel-block">
+              <div class="block-header">
+                <h2>Voice Input</h2>
+              </div>
+              <div class="form-row">
+                <label>
+                  Voice source
+                  <span class="tooltip" data-tooltip="Upload a short reference clip for zero-shot voice cloning.">
+                    ?
+                  </span>
+                </label>
+                <div class="radio-group">
+                  <label><input type="radio" name="voice-method" value="upload" checked /> Upload</label>
+                  <label><input type="radio" name="voice-method" value="record" disabled /> Record (todo)</label>
+                </div>
+              </div>
+
+              <div
+                id="voice-dropzone"
+                class="dropzone"
+                data-tooltip="Drag &amp; drop WAV / MP3 / FLAC / OGG here, or click to browse."
+              >
+                <div class="dropzone-inner">
+                  <span id="voice-dropzone-label">Drop or click to upload voice sample</span>
+                </div>
+                <input
+                  type="file"
+                  id="voice-file-input"
+                  accept=".wav,.mp3,.flac,.ogg,audio/*"
+                  hidden
+                />
+              </div>
+              <div class="voice-info" id="voice-info"></div>
+            </div>
+
+            <div class="panel-block">
+              <div class="block-header">
+                <h2>Text</h2>
+              </div>
+              <div class="form-row">
+                <label for="text-input">
+                  Script
+                  <span
+                    class="tooltip"
+                    data-tooltip="Up to 5000 characters. You can paste multi-paragraph text here."
+                  >
+                    ?
+                  </span>
+                </label>
+                <textarea
+                  id="text-input"
+                  rows="7"
+                  placeholder="Type what you want the model to say…"
+                ></textarea>
+                <div class="char-counter">
+                  <span id="char-count">0</span>/5000
+                </div>
+              </div>
+              <div class="form-row form-row-inline">
+                <button id="clear-text-btn" class="btn btn-ghost" type="button">
+                  Clear
+                </button>
+                <button
+                  id="generate-btn"
+                  class="btn btn-primary"
+                  type="button"
+                  title="Ctrl+Enter to generate"
+                >
+                  Generate
+                </button>
+              </div>
+            </div>
+
+            <div class="panel-block">
+              <div class="block-header">
+                <h2>Advanced</h2>
+              </div>
+              <div class="advanced-grid">
+                <div class="form-row">
+                  <label for="temperature-slider">
+                    Temperature
+                    <span class="tooltip" data-tooltip="Higher = more creative, lower = more stable.">
+                      ?
+                    </span>
+                  </label>
+                  <input
+                    id="temperature-slider"
+                    type="range"
+                    min="0.1"
+                    max="1.5"
+                    step="0.05"
+                    value="0.7"
+                  />
+                  <div class="slider-value" id="temperature-value">0.7</div>
+                </div>
+
+                <div class="form-row">
+                  <label for="speed-slider">
+                    Speed
+                    <span class="tooltip" data-tooltip="Playback speed / duration control.">
+                      ?
+                    </span>
+                  </label>
+                  <input
+                    id="speed-slider"
+                    type="range"
+                    min="0.5"
+                    max="1.5"
+                    step="0.05"
+                    value="1.0"
+                  />
+                  <div class="slider-value" id="speed-value">1.0</div>
+                </div>
+
+                <div class="form-row">
+                  <label for="emotion-select">
+                    Emotion
+                    <span class="tooltip" data-tooltip="Future: map to model-specific style tokens.">
+                      ?
+                    </span>
+                  </label>
+                  <select id="emotion-select">
+                    <option value="neutral">Neutral</option>
+                    <option value="happy">Happy</option>
+                    <option value="sad">Sad</option>
+                    <option value="angry">Angry</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- RIGHT PANEL -->
+        <section class="panel panel-right">
+          <div class="panel-scroll">
+            <div class="panel-block output-block">
+              <div class="block-header">
+                <h2>Output</h2>
+              </div>
+              <div class="output-main">
+                <div class="waveform-shell">
+                  <div id="waveform-placeholder">
+                    <span>No generation yet</span>
+                  </div>
+                  <audio id="audio-player" controls class="audio-player" style="display: none">
+                    Your browser does not support the audio element.
+                  </audio>
+                </div>
+                <div class="output-actions">
+                  <button id="download-btn" class="btn btn-ghost" type="button" disabled>
+                    Download
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="panel-block">
+              <div class="block-header block-header-row">
+                <h2>History</h2>
+                <button id="refresh-history-btn" class="btn btn-ghost-small" type="button">
+                  Refresh
+                </button>
+              </div>
+              <div id="history-list" class="history-list">
+                <!-- Populated by JS -->
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <div id="toast-container" class="toast-container"></div>
+      <div id="global-loading" class="global-loading hidden">
+        <div class="spinner"></div>
+        <span>Generating…</span>
+      </div>
+    </div>
+
+    <script>
+      window.APP_CONFIG = {
+        port: {{ port }},
+      };
+    </script>
+    <script src="/static/js/app.js"></script>
+  </body>
+</html>
+
+
