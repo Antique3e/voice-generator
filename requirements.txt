@@ -5,4 +5,12 @@ python-multipart==0.0.9
 numpy==2.1.1
 scipy==1.14.1
 
+# Higgs-Audio V2 dependencies
+torch>=2.0.0
+transformers>=4.40.0
+accelerate>=0.30.0
+sentencepiece>=0.1.99
+librosa>=0.10.0
+soundfile>=0.12.0
+
 
